@@ -1,21 +1,30 @@
 using Avalonia.Markup.Xaml;
+using Avalonia.Metadata;
 using Avalonia.Styling;
 
 namespace MaterialYou.Avalonia.DynamicColor;
 
 public class MdElevationExtension(int level) : MarkupExtension
 {
+    [ConstructorArgument(nameof(level))]
     public int Level { get; set; } = level;
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-        var targetObj = target?.TargetObject as AvaloniaObject;
-        var targetProp = target?.TargetProperty as AvaloniaProperty;
+        var targetInfo = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+        var targetObj = targetInfo?.TargetObject as AvaloniaObject;
+        var targetProp = targetInfo?.TargetProperty as AvaloniaProperty;
 
         var level = Math.Clamp(Level, 0, 5);
 
-        // For Setter.Value (object type), return observable
+        // Setter context -> return computed BoxShadows directly (no observable subscription available)
+        if (targetInfo?.TargetObject is Setter)
+        {
+            var dark = Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
+            return level == 0 ? new BoxShadows() : new BoxShadows(GetShadow(level, dark));
+        }
+
+        // For object-typed properties (non-Setter), return observable
         if (targetProp?.PropertyType == typeof(object))
             return new ElevationObservable(level, targetObj);
 

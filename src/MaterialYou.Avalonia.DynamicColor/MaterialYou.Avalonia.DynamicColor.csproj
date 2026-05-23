@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="MaterialYou.Avalonia.DynamicColor.Tests"/>
+        <InternalsVisibleTo Include="MaterialYou.Avalonia.IntegrationTests"/>
     </ItemGroup>
 
 </Project>

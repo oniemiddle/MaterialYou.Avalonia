@@ -11,6 +11,7 @@
     <PackageVersion Include="MaterialColorUtilities" Version="0.3.0"/>
     <!--demo-->
     <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)"/>
+    <PackageVersion Include="Avalonia.Headless" Version="$(AvaloniaVersion)"/>
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
     <!--test-->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>

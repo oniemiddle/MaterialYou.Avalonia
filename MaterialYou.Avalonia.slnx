@@ -20,5 +20,6 @@
     <Project Path="src/MaterialYou.Avalonia/MaterialYou.Avalonia.csproj"/>
     <Folder Name="/Tests/">
         <Project Path="test/MaterialYou.Avalonia.DynamicColor.Tests/MaterialYou.Avalonia.DynamicColor.Tests.csproj"/>
+        <Project Path="test/MaterialYou.Avalonia.IntegrationTests/MaterialYou.Avalonia.IntegrationTests.csproj"/>
     </Folder>
 </Solution>
