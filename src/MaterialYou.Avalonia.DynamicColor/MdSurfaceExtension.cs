@@ -1,17 +1,11 @@
-using System;
-using Avalonia;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using MaterialColorUtilities.Schemes;
 
 namespace MaterialYou.Avalonia.DynamicColor;
 
-public class MdSurfaceExtension : MarkupExtension
+public class MdSurfaceExtension(int level) : MarkupExtension
 {
-    public int Level { get; set; }
-
-    public MdSurfaceExtension() { }
-    public MdSurfaceExtension(int level) => Level = level;
+    public int Level { get; set; } = level;
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
@@ -40,8 +34,10 @@ public class MdSurfaceExtension : MarkupExtension
 
         var weakTarget = new WeakReference<AvaloniaObject>(target);
 
-        EventHandler<Scheme<uint>?>? handler = null;
-        handler = (_, _) =>
+        MaterialColor.SchemeChanged += Handler;
+        return;
+
+        void Handler(object? o, Scheme<uint>? scheme)
         {
             if (weakTarget.TryGetTarget(out var t))
             {
@@ -49,10 +45,9 @@ public class MdSurfaceExtension : MarkupExtension
             }
             else
             {
-                MaterialColor.SchemeChanged -= handler;
+                MaterialColor.SchemeChanged -= Handler;
             }
-        };
-        MaterialColor.SchemeChanged += handler;
+        }
     }
 
     private static Color GetSurfaceColor(int level)
@@ -75,9 +70,9 @@ public class MdSurfaceExtension : MarkupExtension
     }
 }
 
-internal class SurfaceObservable : IObservable<object?>
+internal class SurfaceObservable(int level) : IObservable<object?>
 {
-    private static readonly Func<Scheme<uint>, uint>[] SurfaceAccessors =
+    private static readonly Func<Scheme<uint>, uint>[] s_surfaceAccessors =
     [
         s => s.Surface,
         s => s.Surface1,
@@ -87,13 +82,22 @@ internal class SurfaceObservable : IObservable<object?>
         s => s.Surface5,
     ];
 
-    private readonly int _level;
     private bool _disposed;
-
-    public SurfaceObservable(int level) => _level = level;
 
     public IDisposable Subscribe(IObserver<object?> observer)
     {
+        Push();
+
+        MaterialColor.SchemeChanged += Handler;
+
+        return new DisposableAction(() =>
+        {
+            _disposed = true;
+            MaterialColor.SchemeChanged -= Handler;
+        });
+
+        void Handler(object? o, Scheme<uint>? scheme) => Push();
+
         void Push()
         {
             if (_disposed) return;
@@ -101,19 +105,7 @@ internal class SurfaceObservable : IObservable<object?>
             if (app == null) return;
             var scheme = MaterialColor.GetScheme(app);
             if (scheme == null) return;
-            observer.OnNext(ColorUtilities.UIntToColor(SurfaceAccessors[_level](scheme)));
+            observer.OnNext(ColorUtilities.UIntToColor(s_surfaceAccessors[level](scheme)));
         }
-
-        Push();
-
-        EventHandler<Scheme<uint>?>? handler = null;
-        handler = (_, _) => Push();
-        MaterialColor.SchemeChanged += handler;
-
-        return new DisposableAction(() =>
-        {
-            _disposed = true;
-            MaterialColor.SchemeChanged -= handler;
-        });
     }
 }

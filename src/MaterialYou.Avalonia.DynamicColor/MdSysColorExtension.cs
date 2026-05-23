@@ -1,18 +1,12 @@
-using System;
 using System.Collections.Generic;
-using Avalonia;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using MaterialColorUtilities.Schemes;
 
 namespace MaterialYou.Avalonia.DynamicColor;
 
-public class MdSysColorExtension : MarkupExtension
+public class MdSysColorExtension(string name) : MarkupExtension
 {
-    public string? Name { get; set; }
-
-    public MdSysColorExtension() { }
-    public MdSysColorExtension(string name) => Name = name;
+    public string? Name { get; set; } = name;
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
@@ -28,7 +22,7 @@ public class MdSysColorExtension : MarkupExtension
 
         // For typed properties (IBrush), return a SolidColorBrush and subscribe to updates
         var scheme = GetCurrentScheme();
-        var color = scheme != null && Getters.TryGetValue(colorName, out var getter)
+        var color = scheme != null && _getters.TryGetValue(colorName, out var getter)
             ? ColorUtilities.UIntToColor(getter(scheme))
             : Colors.Black;
 
@@ -46,13 +40,15 @@ public class MdSysColorExtension : MarkupExtension
 
         var weakTarget = new WeakReference<AvaloniaObject>(target);
 
-        EventHandler<Scheme<uint>?>? handler = null;
-        handler = (_, _) =>
+        MaterialColor.SchemeChanged += Handler;
+        return;
+
+        void Handler(object? o, Scheme<uint>? scheme1)
         {
             if (weakTarget.TryGetTarget(out var t))
             {
                 var scheme = GetCurrentScheme();
-                if (scheme != null && Getters.TryGetValue(colorName, out var getter))
+                if (scheme != null && _getters.TryGetValue(colorName, out var getter))
                 {
                     var newColor = ColorUtilities.UIntToColor(getter(scheme));
                     t.SetValue(prop, new SolidColorBrush(newColor));
@@ -60,10 +56,9 @@ public class MdSysColorExtension : MarkupExtension
             }
             else
             {
-                MaterialColor.SchemeChanged -= handler;
+                MaterialColor.SchemeChanged -= Handler;
             }
-        };
-        MaterialColor.SchemeChanged += handler;
+        }
     }
 
     internal static Scheme<uint>? GetCurrentScheme()
@@ -72,74 +67,70 @@ public class MdSysColorExtension : MarkupExtension
         return app != null ? MaterialColor.GetScheme(app) : null;
     }
 
-    internal static readonly Dictionary<string, Func<Scheme<uint>, uint>> Getters = new()
+    internal static readonly Dictionary<string, Func<Scheme<uint>, uint>> _getters = new()
     {
-        [nameof(Scheme<uint>.Primary)] = s => s.Primary,
-        [nameof(Scheme<uint>.OnPrimary)] = s => s.OnPrimary,
-        [nameof(Scheme<uint>.PrimaryContainer)] = s => s.PrimaryContainer,
-        [nameof(Scheme<uint>.OnPrimaryContainer)] = s => s.OnPrimaryContainer,
-        [nameof(Scheme<uint>.Secondary)] = s => s.Secondary,
-        [nameof(Scheme<uint>.OnSecondary)] = s => s.OnSecondary,
-        [nameof(Scheme<uint>.SecondaryContainer)] = s => s.SecondaryContainer,
-        [nameof(Scheme<uint>.OnSecondaryContainer)] = s => s.OnSecondaryContainer,
-        [nameof(Scheme<uint>.Tertiary)] = s => s.Tertiary,
-        [nameof(Scheme<uint>.OnTertiary)] = s => s.OnTertiary,
-        [nameof(Scheme<uint>.TertiaryContainer)] = s => s.TertiaryContainer,
-        [nameof(Scheme<uint>.OnTertiaryContainer)] = s => s.OnTertiaryContainer,
-        [nameof(Scheme<uint>.Error)] = s => s.Error,
-        [nameof(Scheme<uint>.OnError)] = s => s.OnError,
-        [nameof(Scheme<uint>.ErrorContainer)] = s => s.ErrorContainer,
-        [nameof(Scheme<uint>.OnErrorContainer)] = s => s.OnErrorContainer,
-        [nameof(Scheme<uint>.Background)] = s => s.Background,
-        [nameof(Scheme<uint>.OnBackground)] = s => s.OnBackground,
-        [nameof(Scheme<uint>.Surface)] = s => s.Surface,
-        [nameof(Scheme<uint>.OnSurface)] = s => s.OnSurface,
-        [nameof(Scheme<uint>.SurfaceVariant)] = s => s.SurfaceVariant,
-        [nameof(Scheme<uint>.OnSurfaceVariant)] = s => s.OnSurfaceVariant,
-        [nameof(Scheme<uint>.Outline)] = s => s.Outline,
-        [nameof(Scheme<uint>.OutlineVariant)] = s => s.OutlineVariant,
-        [nameof(Scheme<uint>.Shadow)] = s => s.Shadow,
-        [nameof(Scheme<uint>.InverseSurface)] = s => s.InverseSurface,
-        [nameof(Scheme<uint>.InverseOnSurface)] = s => s.InverseOnSurface,
-        [nameof(Scheme<uint>.InversePrimary)] = s => s.InversePrimary,
-        [nameof(Scheme<uint>.Surface1)] = s => s.Surface1,
-        [nameof(Scheme<uint>.Surface2)] = s => s.Surface2,
-        [nameof(Scheme<uint>.Surface3)] = s => s.Surface3,
-        [nameof(Scheme<uint>.Surface4)] = s => s.Surface4,
-        [nameof(Scheme<uint>.Surface5)] = s => s.Surface5,
-        [nameof(Scheme<uint>.SurfaceDim)] = s => s.SurfaceDim,
-        [nameof(Scheme<uint>.SurfaceBright)] = s => s.SurfaceBright,
-        [nameof(Scheme<uint>.SurfaceContainerLowest)] = s => s.SurfaceContainerLowest,
-        [nameof(Scheme<uint>.SurfaceContainerLow)] = s => s.SurfaceContainerLow,
-        [nameof(Scheme<uint>.SurfaceContainer)] = s => s.SurfaceContainer,
-        [nameof(Scheme<uint>.SurfaceContainerHigh)] = s => s.SurfaceContainerHigh,
-        [nameof(Scheme<uint>.SurfaceContainerHighest)] = s => s.SurfaceContainerHighest,
+        [nameof(Scheme<>.Primary)] = s => s.Primary,
+        [nameof(Scheme<>.OnPrimary)] = s => s.OnPrimary,
+        [nameof(Scheme<>.PrimaryContainer)] = s => s.PrimaryContainer,
+        [nameof(Scheme<>.OnPrimaryContainer)] = s => s.OnPrimaryContainer,
+        [nameof(Scheme<>.Secondary)] = s => s.Secondary,
+        [nameof(Scheme<>.OnSecondary)] = s => s.OnSecondary,
+        [nameof(Scheme<>.SecondaryContainer)] = s => s.SecondaryContainer,
+        [nameof(Scheme<>.OnSecondaryContainer)] = s => s.OnSecondaryContainer,
+        [nameof(Scheme<>.Tertiary)] = s => s.Tertiary,
+        [nameof(Scheme<>.OnTertiary)] = s => s.OnTertiary,
+        [nameof(Scheme<>.TertiaryContainer)] = s => s.TertiaryContainer,
+        [nameof(Scheme<>.OnTertiaryContainer)] = s => s.OnTertiaryContainer,
+        [nameof(Scheme<>.Error)] = s => s.Error,
+        [nameof(Scheme<>.OnError)] = s => s.OnError,
+        [nameof(Scheme<>.ErrorContainer)] = s => s.ErrorContainer,
+        [nameof(Scheme<>.OnErrorContainer)] = s => s.OnErrorContainer,
+        [nameof(Scheme<>.Background)] = s => s.Background,
+        [nameof(Scheme<>.OnBackground)] = s => s.OnBackground,
+        [nameof(Scheme<>.Surface)] = s => s.Surface,
+        [nameof(Scheme<>.OnSurface)] = s => s.OnSurface,
+        [nameof(Scheme<>.SurfaceVariant)] = s => s.SurfaceVariant,
+        [nameof(Scheme<>.OnSurfaceVariant)] = s => s.OnSurfaceVariant,
+        [nameof(Scheme<>.Outline)] = s => s.Outline,
+        [nameof(Scheme<>.OutlineVariant)] = s => s.OutlineVariant,
+        [nameof(Scheme<>.Shadow)] = s => s.Shadow,
+        [nameof(Scheme<>.InverseSurface)] = s => s.InverseSurface,
+        [nameof(Scheme<>.InverseOnSurface)] = s => s.InverseOnSurface,
+        [nameof(Scheme<>.InversePrimary)] = s => s.InversePrimary,
+        [nameof(Scheme<>.Surface1)] = s => s.Surface1,
+        [nameof(Scheme<>.Surface2)] = s => s.Surface2,
+        [nameof(Scheme<>.Surface3)] = s => s.Surface3,
+        [nameof(Scheme<>.Surface4)] = s => s.Surface4,
+        [nameof(Scheme<>.Surface5)] = s => s.Surface5,
+        [nameof(Scheme<>.SurfaceDim)] = s => s.SurfaceDim,
+        [nameof(Scheme<>.SurfaceBright)] = s => s.SurfaceBright,
+        [nameof(Scheme<>.SurfaceContainerLowest)] = s => s.SurfaceContainerLowest,
+        [nameof(Scheme<>.SurfaceContainerLow)] = s => s.SurfaceContainerLow,
+        [nameof(Scheme<>.SurfaceContainer)] = s => s.SurfaceContainer,
+        [nameof(Scheme<>.SurfaceContainerHigh)] = s => s.SurfaceContainerHigh,
+        [nameof(Scheme<>.SurfaceContainerHighest)] = s => s.SurfaceContainerHighest,
     };
 }
 
-internal class SchemeColorObservable : IObservable<object?>
+internal class SchemeColorObservable(string colorName) : IObservable<object?>
 {
-    private readonly string _colorName;
-
-    public SchemeColorObservable(string colorName) => _colorName = colorName;
-
     public IDisposable Subscribe(IObserver<object?> observer)
     {
+        Push();
+
+        MaterialColor.SchemeChanged += Handler;
+
+        return new DisposableAction(() => MaterialColor.SchemeChanged -= Handler);
+
+        void Handler(object? o, Scheme<uint>? scheme) => Push();
+
         void Push()
         {
             var scheme = MdSysColorExtension.GetCurrentScheme();
-            uint? value = scheme != null && MdSysColorExtension.Getters.TryGetValue(_colorName, out var getter)
+            uint? value = scheme != null && MdSysColorExtension._getters.TryGetValue(colorName, out var getter)
                 ? getter(scheme)
                 : null;
-            observer.OnNext(value is uint u ? (object)ColorUtilities.UIntToColor(u) : null);
+            observer.OnNext(value is { } u ? ColorUtilities.UIntToColor(u) : null);
         }
-
-        Push();
-
-        EventHandler<Scheme<uint>?>? handler = null;
-        handler = (_, _) => Push();
-        MaterialColor.SchemeChanged += handler;
-
-        return new DisposableAction(() => MaterialColor.SchemeChanged -= handler);
     }
 }

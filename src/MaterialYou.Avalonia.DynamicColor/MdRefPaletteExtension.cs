@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using Avalonia;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using MaterialColorUtilities.Palettes;
 using MaterialColorUtilities.Schemes;
 
@@ -45,8 +42,10 @@ public class MdRefPaletteExtension : MarkupExtension
 
         var weakTarget = new WeakReference<AvaloniaObject>(target);
 
-        EventHandler<Scheme<uint>?>? handler = null;
-        handler = (_, _) =>
+        MaterialColor.SchemeChanged += Handler;
+        return;
+
+        void Handler(object? o, Scheme<uint>? scheme)
         {
             if (weakTarget.TryGetTarget(out var t))
             {
@@ -54,10 +53,9 @@ public class MdRefPaletteExtension : MarkupExtension
             }
             else
             {
-                MaterialColor.SchemeChanged -= handler;
+                MaterialColor.SchemeChanged -= Handler;
             }
-        };
-        MaterialColor.SchemeChanged += handler;
+        }
     }
 
     private static Color GetPaletteColor(string paletteName, int tone)
@@ -67,12 +65,12 @@ public class MdRefPaletteExtension : MarkupExtension
         var corePalette = MaterialColor.GetCorePalette(app);
         if (corePalette == null) return Colors.Transparent;
 
-        return PaletteAccessors.TryGetValue(paletteName, out var accessor)
+        return s_paletteAccessors.TryGetValue(paletteName, out var accessor)
             ? ColorUtilities.UIntToColor(accessor(corePalette).Tone((uint)tone))
             : Colors.Transparent;
     }
 
-    private static readonly Dictionary<string, Func<CorePalette, TonalPalette>> PaletteAccessors = new()
+    private static readonly Dictionary<string, Func<CorePalette, TonalPalette>> s_paletteAccessors = new()
     {
         [nameof(CorePalette.Primary)] = p => p.Primary,
         [nameof(CorePalette.Secondary)] = p => p.Secondary,
@@ -83,9 +81,9 @@ public class MdRefPaletteExtension : MarkupExtension
     };
 }
 
-internal class RefPaletteObservable : IObservable<object?>
+internal class RefPaletteObservable(string paletteName, int tone) : IObservable<object?>
 {
-    private static readonly Dictionary<string, Func<CorePalette, TonalPalette>> PaletteAccessors = new()
+    private static readonly Dictionary<string, Func<CorePalette, TonalPalette>> s_paletteAccessors = new()
     {
         [nameof(CorePalette.Primary)] = p => p.Primary,
         [nameof(CorePalette.Secondary)] = p => p.Secondary,
@@ -95,18 +93,22 @@ internal class RefPaletteObservable : IObservable<object?>
         [nameof(CorePalette.Error)] = p => p.Error,
     };
 
-    private readonly string _paletteName;
-    private readonly int _tone;
     private bool _disposed;
-
-    public RefPaletteObservable(string paletteName, int tone)
-    {
-        _paletteName = paletteName;
-        _tone = tone;
-    }
 
     public IDisposable Subscribe(IObserver<object?> observer)
     {
+        Push();
+
+        MaterialColor.SchemeChanged += Handler;
+
+        return new DisposableAction(() =>
+        {
+            _disposed = true;
+            MaterialColor.SchemeChanged -= Handler;
+        });
+
+        void Handler(object? o, Scheme<uint>? scheme) => Push();
+
         void Push()
         {
             if (_disposed) return;
@@ -115,22 +117,10 @@ internal class RefPaletteObservable : IObservable<object?>
             var corePalette = MaterialColor.GetCorePalette(app);
             if (corePalette == null) return;
 
-            var value = PaletteAccessors.TryGetValue(_paletteName, out var accessor)
-                ? accessor(corePalette).Tone((uint)_tone)
+            var value = s_paletteAccessors.TryGetValue(paletteName, out var accessor)
+                ? accessor(corePalette).Tone((uint)tone)
                 : (uint?)null;
-            observer.OnNext(value is uint u ? (object)ColorUtilities.UIntToColor(u) : null);
+            observer.OnNext(value is { } u ? ColorUtilities.UIntToColor(u) : null);
         }
-
-        Push();
-
-        EventHandler<Scheme<uint>?>? handler = null;
-        handler = (_, _) => Push();
-        MaterialColor.SchemeChanged += handler;
-
-        return new DisposableAction(() =>
-        {
-            _disposed = true;
-            MaterialColor.SchemeChanged -= handler;
-        });
     }
 }

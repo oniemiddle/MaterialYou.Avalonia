@@ -1,5 +1,3 @@
-using Avalonia.Media;
-
 namespace MaterialYou.Avalonia.DynamicColor;
 
 internal static class ColorUtilities

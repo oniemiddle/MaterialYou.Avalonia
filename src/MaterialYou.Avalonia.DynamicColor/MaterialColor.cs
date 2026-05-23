@@ -1,5 +1,3 @@
-using System;
-using Avalonia;
 using MaterialColorUtilities.Palettes;
 using MaterialColorUtilities.Schemes;
 
