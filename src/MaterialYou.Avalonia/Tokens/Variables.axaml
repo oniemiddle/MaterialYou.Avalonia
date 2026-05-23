@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- MD3 Spacing & Sizing -->
+    <x:Double x:Key="Space0">0</x:Double>
+    <x:Double x:Key="Space4">4</x:Double>
+    <x:Double x:Key="Space8">8</x:Double>
+    <x:Double x:Key="Space12">12</x:Double>
+    <x:Double x:Key="Space16">16</x:Double>
+    <x:Double x:Key="Space20">20</x:Double>
+    <x:Double x:Key="Space24">24</x:Double>
+    <x:Double x:Key="Space32">32</x:Double>
+    <x:Double x:Key="Space48">48</x:Double>
+    <x:Double x:Key="Space64">64</x:Double>
+
+    <!-- Border Thickness -->
+    <Thickness x:Key="BorderNone">0</Thickness>
+    <Thickness x:Key="BorderThin">1</Thickness>
+    <Thickness x:Key="BorderThick">2</Thickness>
+</ResourceDictionary>

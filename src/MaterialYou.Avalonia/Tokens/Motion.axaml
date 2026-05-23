@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- MD3 Motion: Durations (ms) -->
+    <x:Int32 x:Key="DurationShort1">50</x:Int32>
+    <x:Int32 x:Key="DurationShort2">100</x:Int32>
+    <x:Int32 x:Key="DurationMedium1">200</x:Int32>
+    <x:Int32 x:Key="DurationMedium2">300</x:Int32>
+    <x:Int32 x:Key="DurationLong1">400</x:Int32>
+    <x:Int32 x:Key="DurationLong2">500</x:Int32>
+</ResourceDictionary>

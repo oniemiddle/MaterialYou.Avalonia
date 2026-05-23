@@ -1,0 +1,48 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:muy="https://materialyou.avalonia/dev">
+
+    <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{muy:MdSysColor OnSurface}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ShapeCornerSmall}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="RootBorder"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Panel>
+                        <Border Name="CheckMark"
+                                Width="18" Height="18"
+                                CornerRadius="2"
+                                Background="{muy:MdSysColor SurfaceVariant}"
+                                BorderBrush="{muy:MdSysColor OnSurfaceVariant}"
+                                BorderThickness="2"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                            <Path Name="CheckPath"
+                                  Data="M4,10 L7,13 L14,5"
+                                  Stroke="{muy:MdSysColor OnPrimary}"
+                                  StrokeThickness="2"
+                                  StrokeLineCap="Round"
+                                  StrokeJoin="Round"
+                                  IsVisible="False" />
+                        </Border>
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Margin="26,0,0,0"
+                                          VerticalAlignment="Center" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- Checked State -->
+        <Style Selector="^:checked /template/ Border#CheckMark">
+            <Setter Property="Background" Value="{muy:MdSysColor Primary}" />
+            <Setter Property="BorderBrush" Value="{muy:MdSysColor Primary}" />
+        </Style>
+        <Style Selector="^:checked /template/ Path#CheckPath">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>

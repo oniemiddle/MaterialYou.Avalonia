@@ -49,14 +49,14 @@ Themes are organized as theme dictionaries via `ResourceDictionary.ThemeDictiona
 
 ### Key conventions
 
-- **Target frameworks**: `net8.0;net10.0` for library projects, `net8.0` for desktop demo
+- **Target frameworks**: `net10.0` for all projects
 - **Package versioning**: Centralized in `Directory.Packages.props` with `ManagePackageVersionsCentrally=true`
 - **Avalonia version**: 12.x, nightly feed from `nuget-feed-nightly.avaloniaui.net`
-- **AOT**: `IsAotCompatible=true` for net8.0+ targets
+- **AOT**: `IsAotCompatible=true` for all targets
 - **LangVersion**: `latest` with nullable enabled
 - **Commit style**: Conventional Commits (`feat:`, `fix:`, `docs:`, etc.) with lowercase descriptions, scoped by package/area
 - **XAML namespace**: `https://materialyou.avalonia/dev`
-- **SDK**: .NET 8.0 SDK minimum, `rollForward: latestMajor`
+- **SDK**: .NET 10.0 SDK minimum, `rollForward: latestMajor`
 
 ### Important code paths
 

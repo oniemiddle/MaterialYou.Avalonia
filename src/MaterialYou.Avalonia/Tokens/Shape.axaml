@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- MD3 Shape: CornerRadius resources -->
+    <CornerRadius x:Key="ShapeCornerNone">0</CornerRadius>
+    <CornerRadius x:Key="ShapeCornerSmall">4</CornerRadius>
+    <CornerRadius x:Key="ShapeCornerMedium">8</CornerRadius>
+    <CornerRadius x:Key="ShapeCornerLarge">12</CornerRadius>
+    <CornerRadius x:Key="ShapeCornerFull">16</CornerRadius>
+</ResourceDictionary>

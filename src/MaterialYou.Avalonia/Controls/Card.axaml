@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:muy="https://materialyou.avalonia/dev">
+
+    <!-- ElevatedCard -->
+    <ControlTheme x:Key="ElevatedCard" TargetType="Border">
+        <Setter Property="Background" Value="{muy:MdSurface 1}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ShapeCornerMedium}" />
+        <Setter Property="BoxShadow" Value="{muy:MdElevation 1}" />
+        <Setter Property="Padding" Value="16" />
+    </ControlTheme>
+
+    <!-- FilledCard -->
+    <ControlTheme x:Key="FilledCard" TargetType="Border">
+        <Setter Property="Background" Value="{muy:MdSysColor SurfaceVariant}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ShapeCornerMedium}" />
+        <Setter Property="Padding" Value="16" />
+    </ControlTheme>
+</ResourceDictionary>

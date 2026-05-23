@@ -1,22 +1,101 @@
-<Window
-    x:Class="MaterialYou.Avalonia.Demo.Views.MainWindow"
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="MaterialYou.Avalonia Demo"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d">
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
-        <TextBlock Text="MaterialYou.Avalonia"
-                   FontSize="28" FontWeight="Bold"
-                   HorizontalAlignment="Center" />
-        <TextBlock Text="Material Design 3 theme for Avalonia UI"
-                   FontSize="16"
-                   HorizontalAlignment="Center" />
-        <TextBlock Text="Controls coming in subsequent issues."
-                   FontSize="14"
-                   HorizontalAlignment="Center" />
-    </StackPanel>
+<Window x:Class="MaterialYou.Avalonia.Demo.Views.MainWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:muy="https://materialyou.avalonia/dev"
+        xmlns:vm="using:MaterialYou.Avalonia.Demo.ViewModels"
+        x:DataType="vm:MainViewModel"
+        Title="MaterialYou.Avalonia Demo"
+        d:DesignHeight="600"
+        d:DesignWidth="900"
+        mc:Ignorable="d"
+        Background="{muy:MdSysColor Background}"
+        Foreground="{muy:MdSysColor OnSurface}">
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+    <ScrollViewer Padding="32">
+        <StackPanel Spacing="24">
+            <!-- Header -->
+            <TextBlock Text="MaterialYou.Avalonia"
+                       Classes="DisplaySmall"
+                       Foreground="{muy:MdSysColor Primary}" />
+            <TextBlock Text="Material Design 3 theme for Avalonia UI"
+                       Classes="BodyLarge"
+                       Foreground="{muy:MdSysColor OnSurfaceVariant}" />
+
+            <Separator Background="{muy:MdSysColor OutlineVariant}" Height="1" />
+
+            <!-- Buttons -->
+            <TextBlock Text="Buttons" Classes="TitleMedium" />
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Theme="{StaticResource FilledButton}" Content="Filled" />
+                <Button Theme="{StaticResource TonalButton}" Content="Tonal" />
+                <Button Theme="{StaticResource OutlinedButton}" Content="Outlined" />
+                <Button Theme="{StaticResource TextButton}" Content="Text" />
+            </StackPanel>
+
+            <!-- Cards -->
+            <TextBlock Text="Cards" Classes="TitleMedium" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <Border Theme="{StaticResource ElevatedCard}" MinWidth="160" MinHeight="80">
+                    <TextBlock Text="Elevated Card" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+                <Border Theme="{StaticResource FilledCard}" MinWidth="160" MinHeight="80">
+                    <TextBlock Text="Filled Card" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+            </StackPanel>
+
+            <!-- TextBox -->
+            <TextBlock Text="Text Fields" Classes="TitleMedium" />
+            <StackPanel Spacing="8" MaxWidth="400">
+                <TextBox PlaceholderText="Filled text field" />
+            </StackPanel>
+
+            <!-- CheckBox -->
+            <TextBlock Text="CheckBox" Classes="TitleMedium" />
+            <StackPanel Spacing="4">
+                <CheckBox Content="Option A" IsChecked="True" />
+                <CheckBox Content="Option B" />
+                <CheckBox Content="Option C" IsChecked="{x:Null}" IsThreeState="True" />
+            </StackPanel>
+
+            <!-- ToggleSwitch -->
+            <TextBlock Text="Toggle Switch" Classes="TitleMedium" />
+            <StackPanel Spacing="4">
+                <ToggleSwitch Content="Wi-Fi" IsChecked="True" />
+                <ToggleSwitch Content="Bluetooth" />
+            </StackPanel>
+
+            <!-- Seed Color Picker -->
+            <TextBlock Text="Seed Color" Classes="TitleMedium" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Theme="{StaticResource FilledButton}"
+                        Background="#FF6750A4"
+                        Foreground="White"
+                        Content="Purple"
+                        Command="{Binding UpdateSeedCommand}"
+                        CommandParameter="FF6750A4" />
+                <Button Theme="{StaticResource FilledButton}"
+                        Background="#FF0061A4"
+                        Foreground="White"
+                        Content="Blue"
+                        Command="{Binding UpdateSeedCommand}"
+                        CommandParameter="FF0061A4" />
+                <Button Theme="{StaticResource FilledButton}"
+                        Background="#FFE91E63"
+                        Foreground="White"
+                        Content="Pink"
+                        Command="{Binding UpdateSeedCommand}"
+                        CommandParameter="FFE91E63" />
+                <Button Theme="{StaticResource FilledButton}"
+                        Background="#FF018786"
+                        Foreground="White"
+                        Content="Teal"
+                        Command="{Binding UpdateSeedCommand}"
+                        CommandParameter="FF018786" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </Window>
