@@ -105,7 +105,7 @@ internal class SurfaceObservable(int level) : IObservable<object?>
             if (app == null) return;
             var scheme = MaterialColor.GetScheme(app);
             if (scheme == null) return;
-            observer.OnNext(ColorUtilities.UIntToColor(s_surfaceAccessors[level](scheme)));
+            observer.OnNext(new SolidColorBrush(ColorUtilities.UIntToColor(s_surfaceAccessors[level](scheme))));
         }
     }
 }

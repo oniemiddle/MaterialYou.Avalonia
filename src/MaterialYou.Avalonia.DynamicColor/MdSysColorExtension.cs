@@ -130,7 +130,7 @@ internal class SchemeColorObservable(string colorName) : IObservable<object?>
             uint? value = scheme != null && MdSysColorExtension._getters.TryGetValue(colorName, out var getter)
                 ? getter(scheme)
                 : null;
-            observer.OnNext(value is { } u ? ColorUtilities.UIntToColor(u) : null);
+            observer.OnNext(value is { } u ? (object?)new SolidColorBrush(ColorUtilities.UIntToColor(u)) : null);
         }
     }
 }

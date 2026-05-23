@@ -37,6 +37,10 @@ public class MdElevationExtension(int level) : MarkupExtension
                     var dark = se2.ActualThemeVariant == ThemeVariant.Dark;
                     t.SetValue(targetProp, new BoxShadows(GetShadow(level, dark)));
                 }
+                else if (o is StyledElement se3)
+                {
+                    se3.ActualThemeVariantChanged -= OnThemeChanged;
+                }
             }
 
             if (targetObj is StyledElement se2)
@@ -46,25 +50,27 @@ public class MdElevationExtension(int level) : MarkupExtension
         return result;
     }
 
+    internal static readonly (int OffsetY, int Blur, double Opacity)[] s_elevationLevels =
+    [
+        (0, 0, 0.0),   // Level 0 (unused sentinel)
+        (1, 3, 0.30),  // Level 1
+        (2, 6, 0.30),  // Level 2
+        (4, 10, 0.30), // Level 3
+        (6, 14, 0.30), // Level 4
+        (8, 20, 0.30), // Level 5
+    ];
+
     private static BoxShadow GetShadow(int level, bool isDark)
     {
         if (level == 0) return default;
 
-        var (y, blur, opacity) = level switch
-        {
-            1 => (1, 3, 0.30),
-            2 => (2, 6, 0.30),
-            3 => (4, 10, 0.30),
-            4 => (6, 14, 0.30),
-            5 => (8, 20, 0.30),
-            _ => (0, 0, 0.0),
-        };
-        var alpha = isDark ? (byte)(opacity * 0.35 * 255) : (byte)(opacity * 255);
+        var entry = s_elevationLevels[level];
+        var alpha = isDark ? (byte)(entry.Opacity * 0.35 * 255) : (byte)(entry.Opacity * 255);
         return new BoxShadow
         {
             OffsetX = 0,
-            OffsetY = y,
-            Blur = blur,
+            OffsetY = entry.OffsetY,
+            Blur = entry.Blur,
             Color = Color.FromArgb(alpha, 0, 0, 0)
         };
     }
@@ -89,7 +95,7 @@ internal class ElevationObservable(int level, AvaloniaObject? target) : IObserva
             if (target is StyledElement se2)
                 se2.ActualThemeVariantChanged -= OnThemeChanged;
         });
-        
+
         void OnThemeChanged(object? o, EventArgs eventArgs) => Push();
 
         void Push()
@@ -104,21 +110,13 @@ internal class ElevationObservable(int level, AvaloniaObject? target) : IObserva
             var isDark = target is StyledElement se1 &&
                          se1.ActualThemeVariant == ThemeVariant.Dark;
 
-            var (y, blur, opacity) = level switch
-            {
-                1 => (1, 3, 0.30),
-                2 => (2, 6, 0.30),
-                3 => (4, 10, 0.30),
-                4 => (6, 14, 0.30),
-                5 => (8, 20, 0.30),
-                _ => (0, 0, 0.0),
-            };
-            var alpha = isDark ? (byte)(opacity * 0.35 * 255) : (byte)(opacity * 255);
+            var entry = MdElevationExtension.s_elevationLevels[level];
+            var alpha = isDark ? (byte)(entry.Opacity * 0.35 * 255) : (byte)(entry.Opacity * 255);
             observer.OnNext(new BoxShadows(new BoxShadow
             {
                 OffsetX = 0,
-                OffsetY = y,
-                Blur = blur,
+                OffsetY = entry.OffsetY,
+                Blur = entry.Blur,
                 Color = Color.FromArgb(alpha, 0, 0, 0)
             }));
         }

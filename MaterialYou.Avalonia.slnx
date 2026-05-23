@@ -18,4 +18,7 @@
     <Project Path="src/MaterialYou.Avalonia.DynamicColor/MaterialYou.Avalonia.DynamicColor.csproj"/>
     <Project Path="src/MaterialYou.Avalonia.MaterialSymbols/MaterialYou.Avalonia.MaterialSymbols.csproj"/>
     <Project Path="src/MaterialYou.Avalonia/MaterialYou.Avalonia.csproj"/>
+    <Folder Name="/Tests/">
+        <Project Path="test/MaterialYou.Avalonia.DynamicColor.Tests/MaterialYou.Avalonia.DynamicColor.Tests.csproj"/>
+    </Folder>
 </Solution>
