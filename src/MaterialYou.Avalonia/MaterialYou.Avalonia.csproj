@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+        <Version>0.1.0</Version>
+        <PackageReleaseNotes>Initial MaterialYou.Avalonia preview</PackageReleaseNotes>
+        <Title>MaterialYou.Avalonia</Title>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia"/>
+    </ItemGroup>
+
+</Project>
