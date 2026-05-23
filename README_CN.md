@@ -1,96 +1,68 @@
-# Semi Avalonia
+# MaterialYou.Avalonia
 
-[![Semi Avalonia](https://img.shields.io/nuget/v/Semi.Avalonia.svg?color=red&style=flat-square)](https://www.nuget.org/packages/Semi.Avalonia/)
-[![Semi Avalonia](https://img.shields.io/nuget/dt/Semi.Avalonia.svg?style=flat-square)](https://www.nuget.org/packages/Semi.Avalonia/)
-[![GitCode](https://gitcode.com/IRIHI_Technology/Semi.Avalonia/star/badge.svg)](https://gitcode.com/IRIHI_Technology/Semi.Avalonia)
+[![MaterialYou.Avalonia](https://img.shields.io/nuget/v/MaterialYou.Avalonia.svg?color=red&style=flat-square)](https://www.nuget.org/packages/MaterialYou.Avalonia/)
+[![MaterialYou.Avalonia](https://img.shields.io/nuget/dt/MaterialYou.Avalonia.svg?style=flat-square)](https://www.nuget.org/packages/MaterialYou.Avalonia/)
 
 [English](./README.md)
 
-Avalonia UI 控件主题，灵感来自 Semi Design
+基于 **Material Design 3 (Material You)** 设计系统的 Avalonia UI 主题库，支持动态颜色。
 
-Semi.Avalonia 现在可以在浏览器上 [查看效果](https://irihitech.github.io/Semi.Avalonia/)
+## 特性
 
-如果您希望查看更详细的文档，请浏览 [Semi 文档](https://docs.irihi.tech/semi/)
-
-如果您希望使用更多的拓展控件，欢迎尝试 [Ursa](https://github.com/irihitech/Ursa.Avalonia)
-
-![Light](./docs/demo.jpg)
+- **动态颜色** — 从单个种子颜色生成完整的 Material 3 色彩方案
+- **设计令牌** — MD3 排版、形状、高度、动效系统
+- **主题控件** — Button、Card、TextBox、CheckBox、ToggleSwitch，带 MD3 状态层
+- **主题变体** — 浅色/深色模式支持
+- **Material Symbols** — 图标集成（MVP）
 
 ## 如何使用
 
 ### 安装
 
 ```bash
-dotnet add package Semi.Avalonia
+dotnet add package MaterialYou.Avalonia
 ```
 
-在样式中引用 Semi 主题：
+在 Application 中引用 Material You 样式：
 
-```xaml
+```xml
 <Application
     ...
-    xmlns:semi="https://irihi.tech/semi">
+    xmlns:material="https://materialyou.avalonia/dev">
     <Application.Styles>
-        <semi:SemiTheme Locale="zh-CN" />
+        <material:MaterialYouTheme />
     </Application.Styles>
 </Application>
 ```
 
+在代码中设置动态颜色：
+
+```csharp
+MaterialColor.SetScheme(Application.Current, new Scheme<uint>(
+    seed: 0xFF6750A4  // 或检测系统主题色
+));
+```
+
 这样就可以了。
 
-ColorPicker、DataGrid、TreeDataGrid、Dock、Tabalonia 和 AvaloniaEdit 的样式单独分发，如果需要请安装并引用。
+## DynamicColor 包
+
+`MaterialYou.Avalonia.DynamicColor` 包提供了在 XAML 中使用配色方案的标记扩展：
+
+- `{MdSysColor Primary}` — MD3 系统颜色令牌
+- `{MdRefPalette Primary, 60}` — 参考色板色调
+- `{MdElevation 2}` — 感知主题变体的高度阴影
+- `{MdSurface 2}` — 预混合高度着色的表面色
+
+## 示例程序
 
 ```bash
-dotnet add package Semi.Avalonia.ColorPicker
-dotnet add package Semi.Avalonia.DataGrid
-dotnet add package Semi.Avalonia.TreeDataGrid
-dotnet add package Semi.Avalonia.Dock
-dotnet add package Semi.Avalonia.Tabalonia
-dotnet add package Semi.Avalonia.AvaloniaEdit
+dotnet run --project demo/MaterialYou.Avalonia.Demo.Desktop
 ```
-
-```xaml
-<Application.Styles>
-    <semi:ColorPickerSemiTheme />
-    <semi:DataGridSemiTheme />
-    <semi:TreeDataGridSemiTheme />
-    <semi:DockSemiTheme />
-    <semi:TabaloniaSemiTheme />
-    <semi:AvaloniaEditSemiTheme />
-</Application.Styles>
-```
-
-注意：Dock、Tabalonia 和 AvaloniaEdit 是通过 NuGet 免费分发的，但不是开源的。请阅读许可协议并同意后继续使用这些包。如果您需要源代码，请通过电子邮件联系我们：[contact@irihi.tech](contact@irihi.tech)
-
-## 示例
-
-您可以从 Semi Avalonia 的 release 页下载并试用 Semi Avalonia 的展示应用。
-<https://github.com/irihitech/Semi.Avalonia/releases>
-
-## 社区支持
-
-我们提供有限度的免费社区支持，如果您有任何问题或建议，除了在GitHub上提交issue或发起讨论，也欢迎加入我们的飞书交流群：
-
-![FeiShu](./docs/community-support.png)
-
-## 版本兼容性
-
-| Semi Avalonia Version | Avalonia Version |
-|:----------------------|:-----------------|
-| 11.3.7                | >=11.3.7         |
-| 11.2.1                | >=11.2.1         |
-| 11.2.0                | End of Life      |
-| 11.1.x                | End of Life      |
 
 ## 致谢
 
-[Semi Design](https://semi.design/)
-
-[Avalonia](https://github.com/AvaloniaUI/Avalonia)
-
-[FluentAvalonia](https://github.com/amwx/FluentAvalonia)
-
-[Material Design Icons](https://pictogrammers.com/library/mdi/)
-
-[CommunityToolKit](https://github.com/CommunityToolkit/dotnet)
-
+- [Material Design 3](https://m3.material.io/)
+- [Avalonia](https://github.com/AvaloniaUI/Avalonia)
+- [MaterialColorUtilities](https://github.com/Shirasagi0012/MaterialColorUtilities)
+- [Semi.Avalonia](https://github.com/irihitech/Semi.Avalonia)（原始项目架构）
