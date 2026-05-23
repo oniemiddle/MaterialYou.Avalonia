@@ -1,0 +1,10 @@
+<Application
+    Name="MaterialYou Demo"
+    x:Class="MaterialYou.Avalonia.Demo.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:muy="https://materialyou.avalonia/dev">
+    <Application.Styles>
+        <muy:MaterialYouTheme />
+    </Application.Styles>
+</Application>

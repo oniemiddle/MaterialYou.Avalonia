@@ -1,0 +1,12 @@
+<Styles x:Class="MaterialYou.Avalonia.MaterialYouTheme"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Tokens/_index.axaml" />
+                <ResourceInclude Source="/Locale/zh-cn.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+</Styles>

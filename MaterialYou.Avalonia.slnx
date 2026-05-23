@@ -1,0 +1,21 @@
+<Solution>
+    <Folder Name="/Demo/">
+        <Project Path="demo/MaterialYou.Avalonia.Demo.Desktop/MaterialYou.Avalonia.Demo.Desktop.csproj"/>
+        <Project Path="demo/MaterialYou.Avalonia.Demo/MaterialYou.Avalonia.Demo.csproj"/>
+    </Folder>
+    <Folder Name="/Solution Items/">
+        <File Path="Directory.Packages.props"/>
+        <File Path="global.json"/>
+        <File Path="Nuget.Config"/>
+    </Folder>
+    <Folder Name="/Solution Items/Demo/">
+        <File Path="demo/Directory.Build.targets"/>
+        <File Path="demo/global.json"/>
+    </Folder>
+    <Folder Name="/Solution Items/Src/">
+        <File Path="src/Directory.Build.props"/>
+    </Folder>
+    <Project Path="src/MaterialYou.Avalonia.DynamicColor/MaterialYou.Avalonia.DynamicColor.csproj"/>
+    <Project Path="src/MaterialYou.Avalonia.MaterialSymbols/MaterialYou.Avalonia.MaterialSymbols.csproj"/>
+    <Project Path="src/MaterialYou.Avalonia/MaterialYou.Avalonia.csproj"/>
+</Solution>

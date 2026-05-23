@@ -1,96 +1,68 @@
-# Semi Avalonia
+# MaterialYou.Avalonia
 
-[![Semi Avalonia](https://img.shields.io/nuget/v/Semi.Avalonia.svg?color=red&style=flat-square)](https://www.nuget.org/packages/Semi.Avalonia/)
-[![Semi Avalonia](https://img.shields.io/nuget/dt/Semi.Avalonia.svg?style=flat-square)](https://www.nuget.org/packages/Semi.Avalonia/)
-[![GitCode](https://gitcode.com/IRIHI_Technology/Semi.Avalonia/star/badge.svg)](https://gitcode.com/IRIHI_Technology/Semi.Avalonia)
+[![MaterialYou.Avalonia](https://img.shields.io/nuget/v/MaterialYou.Avalonia.svg?color=red&style=flat-square)](https://www.nuget.org/packages/MaterialYou.Avalonia/)
+[![MaterialYou.Avalonia](https://img.shields.io/nuget/dt/MaterialYou.Avalonia.svg?style=flat-square)](https://www.nuget.org/packages/MaterialYou.Avalonia/)
 
 [中文](./README_CN.md)
 
-Avalonia Theme inspired by Semi Design
+Avalonia theme library implementing **Material Design 3 (Material You)** design system with dynamic color support.
 
-Semi.Avalonia can be previewed in the browser [here](https://irihitech.github.io/Semi.Avalonia/)
+## Features
 
-If you are looking for more detailed documentation, Please visit [Semi Documentation](https://docs.irihi.tech/semi/)
-
-If you are looking for more customized controls, Please try [Ursa](https://github.com/irihitech/Ursa.Avalonia)
-
-![Light](./docs/demo.jpg)
+- **Dynamic Color** — Generate a complete Material 3 color scheme from a single seed color
+- **Design Tokens** — MD3 typography scale, shape system, elevation, and motion
+- **Themed Controls** — Button, Card, TextBox, CheckBox, ToggleSwitch with MD3 state layers
+- **Theme Variants** — Light and Dark mode support
+- **Material Symbols** — Icon integration (MVP)
 
 ## How to Use
 
 ### Installation
 
 ```bash
-dotnet add package Semi.Avalonia
+dotnet add package MaterialYou.Avalonia
 ```
 
-Include Semi Design Styles in application:
+Include Material You styles in your Application:
 
-```xaml
+```xml
 <Application
     ...
-    xmlns:semi="https://irihi.tech/semi">
+    xmlns:material="https://materialyou.avalonia/dev">
     <Application.Styles>
-        <semi:SemiTheme Locale="zh-CN" />
+        <material:MaterialYouTheme />
     </Application.Styles>
 </Application>
 ```
 
+Set up dynamic color in code-behind:
+
+```csharp
+MaterialColor.SetScheme(Application.Current, new Scheme<uint>(
+    seed: 0xFF6750A4  // or detect system accent color
+));
+```
+
 That's all.
 
-ColorPicker, DataGrid, TreeDataGrid, Dock, Tabalonia and AvaloniaEdit are distributed in separated packages. Please install if you need.
+## DynamicColor
 
-```bash
-dotnet add package Semi.Avalonia.ColorPicker
-dotnet add package Semi.Avalonia.DataGrid
-dotnet add package Semi.Avalonia.TreeDataGrid
-dotnet add package Semi.Avalonia.Dock
-dotnet add package Semi.Avalonia.Tabalonia
-dotnet add package Semi.Avalonia.AvaloniaEdit
-```
+The `MaterialYou.Avalonia.DynamicColor` package provides markup extensions for consuming scheme colors in XAML:
 
-```xaml
-<Application.Styles>
-    <semi:ColorPickerSemiTheme />
-    <semi:DataGridSemiTheme />
-    <semi:TreeDataGridSemiTheme />
-    <semi:DockSemiTheme />
-    <semi:TabaloniaSemiTheme />
-    <semi:AvaloniaEditSemiTheme />
-</Application.Styles>
-```
-
-Notice: Dock, Tabalonia and AvaloniaEdit are delivered via nuget for free, but not open source. Please read the license and agree to continue use these packages. If you need source code, please contact us via email: [contact@irihi.tech](contact@irihi.tech)
+- `{MdSysColor Primary}` — MD3 system color token
+- `{MdRefPalette Primary, 60}` — reference palette tone
+- `{MdElevation 2}` — theme-variant-aware elevation shadow
+- `{MdSurface 2}` — surface with pre-blended elevation tint
 
 ## Demo
 
-You can always download demo executable to play around with Semi Avalonia Themes.
-<https://github.com/irihitech/Semi.Avalonia/releases>
-
-## Support
-
-We offer limited free community support for Semi Avalonia and Ursa. If you have any question or suggestion, feel free to raise issues and discussions via GitHub, and you are welcomed to join our group via FeiShu(Lark)
-
-![FeiShu](./docs/community-support.png)
-
-## Version compatibility
-
-| Semi Avalonia Version | Avalonia Version |
-|:----------------------|:-----------------|
-| 11.3.7                | >=11.3.7         |
-| 11.2.1                | >=11.2.1         |
-| 11.2.0                | End of Life      |
-| 11.1.x                | End of Life      |
+```bash
+dotnet run --project demo/MaterialYou.Avalonia.Demo.Desktop
+```
 
 ## Credits
 
-[Semi Design](https://semi.design/)
-
-[Avalonia](https://github.com/AvaloniaUI/Avalonia)
-
-[FluentAvalonia](https://github.com/amwx/FluentAvalonia)
-
-[Material Design Icons](https://pictogrammers.com/library/mdi/)
-
-[CommunityToolKit](https://github.com/CommunityToolkit/dotnet)
-
+- [Material Design 3](https://m3.material.io/)
+- [Avalonia](https://github.com/AvaloniaUI/Avalonia)
+- [MaterialColorUtilities](https://github.com/Shirasagi0012/MaterialColorUtilities)
+- [Semi.Avalonia](https://github.com/irihitech/Semi.Avalonia) (original project architecture)
