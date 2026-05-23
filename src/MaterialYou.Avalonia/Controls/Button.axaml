@@ -1,0 +1,75 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:muy="https://materialyou.avalonia/dev">
+
+    <!-- Base Button Theme -->
+    <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+        <Setter Property="Background" Value="{muy:MdSysColor Primary}" />
+        <Setter Property="Foreground" Value="{muy:MdSysColor OnPrimary}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ShapeCornerFull}" />
+        <Setter Property="Padding" Value="24,10" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="500" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="RootBorder"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        BorderBrush="{TemplateBinding BorderBrush}">
+                    <Panel>
+                        <ContentPresenter Name="ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        <Border Name="StateLayer"
+                                IsHitTestVisible="False"
+                                Background="{TemplateBinding Foreground}"
+                                Opacity="0" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- State Layer: Hover -->
+        <Style Selector="^:pointerover /template/ Border#StateLayer">
+            <Setter Property="Opacity" Value="0.08" />
+        </Style>
+        <!-- State Layer: Focus -->
+        <Style Selector="^:focus /template/ Border#StateLayer">
+            <Setter Property="Opacity" Value="0.12" />
+        </Style>
+        <!-- State Layer: Pressed -->
+        <Style Selector="^:pressed /template/ Border#StateLayer">
+            <Setter Property="Opacity" Value="0.12" />
+        </Style>
+    </ControlTheme>
+
+    <!-- FilledButton -->
+    <ControlTheme x:Key="FilledButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    </ControlTheme>
+
+    <!-- TonalButton -->
+    <ControlTheme x:Key="TonalButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{muy:MdSysColor SecondaryContainer}" />
+        <Setter Property="Foreground" Value="{muy:MdSysColor OnSecondaryContainer}" />
+    </ControlTheme>
+
+    <!-- OutlinedButton -->
+    <ControlTheme x:Key="OutlinedButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{muy:MdSysColor Primary}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{muy:MdSysColor Outline}" />
+    </ControlTheme>
+
+    <!-- TextButton -->
+    <ControlTheme x:Key="TextButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{muy:MdSysColor Primary}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </ControlTheme>
+</ResourceDictionary>

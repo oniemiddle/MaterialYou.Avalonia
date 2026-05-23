@@ -11,4 +11,8 @@
         <PackageReference Include="Avalonia"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\MaterialYou.Avalonia.DynamicColor\MaterialYou.Avalonia.DynamicColor.csproj"/>
+    </ItemGroup>
+
 </Project>

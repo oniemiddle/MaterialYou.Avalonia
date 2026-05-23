@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:muy="https://materialyou.avalonia/dev">
+
+    <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Panel Name="PART_MovingKnobs"
+                               Width="52" Height="32"
+                               Margin="0,0,12,0"
+                               VerticalAlignment="Center">
+                            <Border Name="Track"
+                                    CornerRadius="16"
+                                    Background="{muy:MdSysColor SurfaceVariant}"
+                                    Opacity="0.5" />
+                            <Border Name="Thumb"
+                                    Width="24" Height="24"
+                                    CornerRadius="12"
+                                    Background="{muy:MdSysColor OnSurface}"
+                                    HorizontalAlignment="Left"
+                                    Margin="4,0,0,0"
+                                    VerticalAlignment="Center" />
+                        </Panel>
+                        <ContentPresenter Name="ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Grid.Column="1"
+                                          VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <!-- Checked State -->
+        <Style Selector="^:checked /template/ Border#Track">
+            <Setter Property="Background" Value="{muy:MdSysColor Primary}" />
+        </Style>
+        <Style Selector="^:checked /template/ Border#Thumb">
+            <Setter Property="Background" Value="{muy:MdSysColor OnPrimary}" />
+            <Setter Property="Margin" Value="24,0,0,0" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>

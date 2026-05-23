@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:muy="https://materialyou.avalonia/dev">
+
+    <!-- TextBox: set MD3 colors via theme properties -->
+    <ControlTheme x:Key="{x:Type TextBox}" TargetType="TextBox">
+        <Setter Property="Foreground" Value="{muy:MdSysColor OnSurface}" />
+        <Setter Property="CaretBrush" Value="{muy:MdSysColor Primary}" />
+        <Setter Property="SelectionBrush" Value="{muy:MdSysColor Primary}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="Background" Value="{muy:MdSysColor SurfaceVariant}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ShapeCornerSmall}" />
+    </ControlTheme>
+</ResourceDictionary>

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
@@ -12,9 +12,11 @@
     <ItemGroup>
         <PackageReference Include="Avalonia"/>
         <PackageReference Include="CommunityToolkit.Mvvm"/>
+        <PackageReference Include="MaterialColorUtilities"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\MaterialYou.Avalonia\MaterialYou.Avalonia.csproj"/>
+        <ProjectReference Include="..\..\src\MaterialYou.Avalonia.DynamicColor\MaterialYou.Avalonia.DynamicColor.csproj"/>
     </ItemGroup>
 </Project>
