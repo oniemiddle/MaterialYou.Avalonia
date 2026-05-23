@@ -20,7 +20,7 @@ public partial class App : Application
         // Set up dynamic color scheme with default seed
         var corePalette = CorePalette.Of(0xFF6750A4);
         Scheme<uint> scheme;
-        if (ActualThemeVariant == ThemeVariant.Dark)
+        if (ActualThemeVariant != ThemeVariant.Light)
             scheme = new DarkSchemeMapper().Map(corePalette);
         else
             scheme = new LightSchemeMapper().Map(corePalette);
@@ -33,7 +33,7 @@ public partial class App : Application
         {
             var cp = MaterialColor.GetCorePalette(this);
             if (cp == null) return;
-            var newScheme = ActualThemeVariant == ThemeVariant.Dark
+            var newScheme = ActualThemeVariant != ThemeVariant.Light
                 ? (Scheme<uint>)new DarkSchemeMapper().Map(cp)
                 : new LightSchemeMapper().Map(cp);
             MaterialColor.SetScheme(this, newScheme);

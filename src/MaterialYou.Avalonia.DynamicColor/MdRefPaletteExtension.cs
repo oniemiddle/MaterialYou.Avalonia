@@ -66,7 +66,7 @@ public class MdRefPaletteExtension : MarkupExtension
         if (corePalette == null) return Colors.Transparent;
 
         return s_paletteAccessors.TryGetValue(paletteName, out var accessor)
-            ? ColorUtilities.UIntToColor(accessor(corePalette).Tone((uint)tone))
+            ? ColorUtilities.UIntToColor(accessor(corePalette).Tone((uint)Math.Clamp(tone, 0, 100)))
             : Colors.Transparent;
     }
 
@@ -118,9 +118,9 @@ internal class RefPaletteObservable(string paletteName, int tone) : IObservable<
             if (corePalette == null) return;
 
             var value = s_paletteAccessors.TryGetValue(paletteName, out var accessor)
-                ? accessor(corePalette).Tone((uint)tone)
+                ? accessor(corePalette).Tone((uint)Math.Clamp(tone, 0, 100))
                 : (uint?)null;
-            observer.OnNext(value is { } u ? ColorUtilities.UIntToColor(u) : null);
+            observer.OnNext(value is { } u ? (object?)new SolidColorBrush(ColorUtilities.UIntToColor(u)) : null);
         }
     }
 }

@@ -14,4 +14,8 @@
         <PackageReference Include="MaterialColorUtilities"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="MaterialYou.Avalonia.DynamicColor.Tests"/>
+    </ItemGroup>
+
 </Project>
