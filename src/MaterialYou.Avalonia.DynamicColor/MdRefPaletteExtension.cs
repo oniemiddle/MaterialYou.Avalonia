@@ -27,13 +27,38 @@ public class MdRefPaletteExtension : MarkupExtension
         if (targetProp?.PropertyType == typeof(object))
             return new RefPaletteObservable(paletteName, tone);
 
+        // For non-Avalonia targets (e.g. Setter in ControlTheme), return a mutable brush
+        // that is updated in-place when the scheme changes.
+        if (targetObj is not AvaloniaObject || targetProp is not AvaloniaProperty)
+        {
+            var app = Application.Current;
+            if (app == null || MaterialColor.GetCorePalette(app) == null)
+                return new SolidColorBrush(Colors.Transparent);
+            var corePalette = MaterialColor.GetCorePalette(app)!;
+            var color = s_paletteAccessors.TryGetValue(paletteName, out var accessor)
+                ? ColorUtilities.UIntToColor(accessor(corePalette).Tone((uint)Math.Clamp(tone, 0, 100)))
+                : Colors.Transparent;
+            var brush = new SolidColorBrush(color);
+            if (accessor != null)
+            {
+                var capturedAccessor = accessor;
+                var capturedTone = tone;
+                SchemeBrushRegistry.Register(brush, _ =>
+                {
+                    var cp = MaterialColor.GetCorePalette(Application.Current!);
+                    return cp != null ? capturedAccessor(cp).Tone((uint)Math.Clamp(capturedTone, 0, 100)) : 0;
+                });
+            }
+            return brush;
+        }
+
         // For typed properties (IBrush), return SolidColorBrush
-        var color = GetPaletteColor(paletteName, tone);
-        var brush = new SolidColorBrush(color);
+        var currentColor = GetPaletteColor(paletteName, tone);
+        var resultBrush = new SolidColorBrush(currentColor);
 
         TrackProperty(targetObj, targetProp, paletteName, tone);
 
-        return brush;
+        return resultBrush;
     }
 
     private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, string paletteName, int tone)

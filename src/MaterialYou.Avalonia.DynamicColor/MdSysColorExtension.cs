@@ -20,18 +20,33 @@ public class MdSysColorExtension(string name) : MarkupExtension
         if (targetProp?.PropertyType == typeof(object))
             return new SchemeColorObservable(colorName);
 
+        // For non-Avalonia targets (e.g. Setter in ControlTheme), return a mutable brush
+        // that is updated in-place when the scheme changes.
+        if (targetObj is not AvaloniaObject || targetProp is not AvaloniaProperty)
+        {
+            var scheme = GetCurrentScheme();
+            if (_getters.TryGetValue(colorName, out var getter) && scheme != null)
+            {
+                var color = ColorUtilities.UIntToColor(getter(scheme));
+                var brush = new SolidColorBrush(color);
+                SchemeBrushRegistry.Register(brush, s => getter(s));
+                return brush;
+            }
+            return new SolidColorBrush(Colors.Black);
+        }
+
         // For typed properties (IBrush), return a SolidColorBrush and subscribe to updates
-        var scheme = GetCurrentScheme();
-        var color = scheme != null && _getters.TryGetValue(colorName, out var getter)
-            ? ColorUtilities.UIntToColor(getter(scheme))
+        var currentScheme = GetCurrentScheme();
+        var currentColor = currentScheme != null && _getters.TryGetValue(colorName, out var currentGetter)
+            ? ColorUtilities.UIntToColor(currentGetter(currentScheme))
             : Colors.Black;
 
-        var brush = new SolidColorBrush(color);
+        var resultBrush = new SolidColorBrush(currentColor);
 
         // Set up dynamic updates on the target property
         TrackProperty(targetObj, targetProp, colorName);
 
-        return brush;
+        return resultBrush;
     }
 
     private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, string colorName)

@@ -19,13 +19,23 @@ public class MdSurfaceExtension(int level) : MarkupExtension
         if (targetProp?.PropertyType == typeof(object))
             return new SurfaceObservable(level);
 
+        // For non-Avalonia targets (e.g. Setter in ControlTheme), return a mutable brush
+        // that is updated in-place when the scheme changes.
+        if (targetObj is not AvaloniaObject || targetProp is not AvaloniaProperty)
+        {
+            var color = GetSurfaceColor(level);
+            var brush = new SolidColorBrush(color);
+            SchemeBrushRegistry.Register(brush, s => SurfaceAccessor(level, s));
+            return brush;
+        }
+
         // For typed properties (IBrush), return SolidColorBrush
-        var color = GetSurfaceColor(level);
-        var brush = new SolidColorBrush(color);
+        var currentColor = GetSurfaceColor(level);
+        var resultBrush = new SolidColorBrush(currentColor);
 
         TrackProperty(targetObj, targetProp, level);
 
-        return brush;
+        return resultBrush;
     }
 
     private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, int level)
@@ -49,6 +59,17 @@ public class MdSurfaceExtension(int level) : MarkupExtension
             }
         }
     }
+
+    private static uint SurfaceAccessor(int level, Scheme<uint> scheme) => level switch
+    {
+        0 => scheme.Surface,
+        1 => scheme.Surface1,
+        2 => scheme.Surface2,
+        3 => scheme.Surface3,
+        4 => scheme.Surface4,
+        5 => scheme.Surface5,
+        _ => scheme.Surface,
+    };
 
     private static Color GetSurfaceColor(int level)
     {

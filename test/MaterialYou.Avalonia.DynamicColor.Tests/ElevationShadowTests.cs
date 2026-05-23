@@ -1,7 +1,4 @@
-using Avalonia;
 using Avalonia.Media;
-using MaterialYou.Avalonia.DynamicColor;
-using Xunit;
 
 namespace MaterialYou.Avalonia.DynamicColor.Tests;
 
