@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using MaterialColorUtilities.Schemes;
 
 namespace MaterialYou.Avalonia.DynamicColor;
@@ -14,7 +15,63 @@ public class MdSurfaceExtension : MarkupExtension
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        return new SurfaceObservable(Math.Clamp(Level, 0, 5));
+        var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+        var targetObj = target?.TargetObject as AvaloniaObject;
+        var targetProp = target?.TargetProperty as AvaloniaProperty;
+
+        var level = Math.Clamp(Level, 0, 5);
+
+        // For Setter.Value (object type), return observable
+        if (targetProp?.PropertyType == typeof(object))
+            return new SurfaceObservable(level);
+
+        // For typed properties (IBrush), return SolidColorBrush
+        var color = GetSurfaceColor(level);
+        var brush = new SolidColorBrush(color);
+
+        TrackProperty(targetObj, targetProp, level);
+
+        return brush;
+    }
+
+    private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, int level)
+    {
+        if (target == null || prop == null) return;
+
+        var weakTarget = new WeakReference<AvaloniaObject>(target);
+
+        EventHandler<Scheme<uint>?>? handler = null;
+        handler = (_, _) =>
+        {
+            if (weakTarget.TryGetTarget(out var t))
+            {
+                t.SetValue(prop, new SolidColorBrush(GetSurfaceColor(level)));
+            }
+            else
+            {
+                MaterialColor.SchemeChanged -= handler;
+            }
+        };
+        MaterialColor.SchemeChanged += handler;
+    }
+
+    private static Color GetSurfaceColor(int level)
+    {
+        var app = Application.Current;
+        if (app == null) return Colors.Transparent;
+        var scheme = MaterialColor.GetScheme(app);
+        if (scheme == null) return Colors.Transparent;
+
+        return level switch
+        {
+            0 => ColorUtilities.UIntToColor(scheme.Surface),
+            1 => ColorUtilities.UIntToColor(scheme.Surface1),
+            2 => ColorUtilities.UIntToColor(scheme.Surface2),
+            3 => ColorUtilities.UIntToColor(scheme.Surface3),
+            4 => ColorUtilities.UIntToColor(scheme.Surface4),
+            5 => ColorUtilities.UIntToColor(scheme.Surface5),
+            _ => Colors.Transparent,
+        };
     }
 }
 
@@ -40,8 +97,11 @@ internal class SurfaceObservable : IObservable<object?>
         void Push()
         {
             if (_disposed) return;
-            var value = GetCurrentValue();
-            observer.OnNext(value is uint u ? (object)ColorUtilities.UIntToColor(u) : value);
+            var app = Application.Current;
+            if (app == null) return;
+            var scheme = MaterialColor.GetScheme(app);
+            if (scheme == null) return;
+            observer.OnNext(ColorUtilities.UIntToColor(SurfaceAccessors[_level](scheme)));
         }
 
         Push();
@@ -55,15 +115,5 @@ internal class SurfaceObservable : IObservable<object?>
             _disposed = true;
             MaterialColor.SchemeChanged -= handler;
         });
-    }
-
-    private object? GetCurrentValue()
-    {
-        var app = Application.Current;
-        if (app == null) return null;
-        var scheme = MaterialColor.GetScheme(app);
-        if (scheme == null) return null;
-
-        return SurfaceAccessors[_level](scheme);
     }
 }

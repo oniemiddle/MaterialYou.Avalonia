@@ -359,6 +359,10 @@ MigrationBackup/
 #################
 .vscode/
 
+# Claude Code local workspace files
+.claude/
+skills-lock.json
+
 #################
 ## Cake
 #################

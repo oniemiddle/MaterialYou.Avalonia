@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using MaterialColorUtilities.Schemes;
 
 namespace MaterialYou.Avalonia.DynamicColor;
@@ -15,13 +16,63 @@ public class MdSysColorExtension : MarkupExtension
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        return new SchemeColorObservable(Name ?? "Primary");
-    }
-}
+        var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+        var targetObj = target?.TargetObject as AvaloniaObject;
+        var targetProp = target?.TargetProperty as AvaloniaProperty;
 
-internal class SchemeColorObservable : IObservable<object?>
-{
-    private static readonly Dictionary<string, Func<Scheme<uint>, uint>> Getters = new()
+        var colorName = Name ?? "Primary";
+
+        // If target is Setter.Value (object type), return observable for styling system
+        if (targetProp?.PropertyType == typeof(object))
+            return new SchemeColorObservable(colorName);
+
+        // For typed properties (IBrush), return a SolidColorBrush and subscribe to updates
+        var scheme = GetCurrentScheme();
+        var color = scheme != null && Getters.TryGetValue(colorName, out var getter)
+            ? ColorUtilities.UIntToColor(getter(scheme))
+            : Colors.Black;
+
+        var brush = new SolidColorBrush(color);
+
+        // Set up dynamic updates on the target property
+        TrackProperty(targetObj, targetProp, colorName);
+
+        return brush;
+    }
+
+    private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, string colorName)
+    {
+        if (target == null || prop == null) return;
+
+        var weakTarget = new WeakReference<AvaloniaObject>(target);
+
+        EventHandler<Scheme<uint>?>? handler = null;
+        handler = (_, _) =>
+        {
+            if (weakTarget.TryGetTarget(out var t))
+            {
+                var scheme = GetCurrentScheme();
+                if (scheme != null && Getters.TryGetValue(colorName, out var getter))
+                {
+                    var newColor = ColorUtilities.UIntToColor(getter(scheme));
+                    t.SetValue(prop, new SolidColorBrush(newColor));
+                }
+            }
+            else
+            {
+                MaterialColor.SchemeChanged -= handler;
+            }
+        };
+        MaterialColor.SchemeChanged += handler;
+    }
+
+    internal static Scheme<uint>? GetCurrentScheme()
+    {
+        var app = Application.Current;
+        return app != null ? MaterialColor.GetScheme(app) : null;
+    }
+
+    internal static readonly Dictionary<string, Func<Scheme<uint>, uint>> Getters = new()
     {
         [nameof(Scheme<uint>.Primary)] = s => s.Primary,
         [nameof(Scheme<uint>.OnPrimary)] = s => s.OnPrimary,
@@ -64,9 +115,11 @@ internal class SchemeColorObservable : IObservable<object?>
         [nameof(Scheme<uint>.SurfaceContainerHigh)] = s => s.SurfaceContainerHigh,
         [nameof(Scheme<uint>.SurfaceContainerHighest)] = s => s.SurfaceContainerHighest,
     };
+}
 
+internal class SchemeColorObservable : IObservable<object?>
+{
     private readonly string _colorName;
-    private bool _disposed;
 
     public SchemeColorObservable(string colorName) => _colorName = colorName;
 
@@ -74,9 +127,11 @@ internal class SchemeColorObservable : IObservable<object?>
     {
         void Push()
         {
-            if (_disposed) return;
-            var value = GetCurrentValue();
-            observer.OnNext(value is uint u ? (object)ColorUtilities.UIntToColor(u) : value);
+            var scheme = MdSysColorExtension.GetCurrentScheme();
+            uint? value = scheme != null && MdSysColorExtension.Getters.TryGetValue(_colorName, out var getter)
+                ? getter(scheme)
+                : null;
+            observer.OnNext(value is uint u ? (object)ColorUtilities.UIntToColor(u) : null);
         }
 
         Push();
@@ -85,20 +140,6 @@ internal class SchemeColorObservable : IObservable<object?>
         handler = (_, _) => Push();
         MaterialColor.SchemeChanged += handler;
 
-        return new DisposableAction(() =>
-        {
-            _disposed = true;
-            MaterialColor.SchemeChanged -= handler;
-        });
-    }
-
-    private object? GetCurrentValue()
-    {
-        var app = Application.Current;
-        if (app == null) return null;
-        var scheme = MaterialColor.GetScheme(app);
-        if (scheme == null) return null;
-
-        return Getters.TryGetValue(_colorName, out var getter) ? getter(scheme) : null;
+        return new DisposableAction(() => MaterialColor.SchemeChanged -= handler);
     }
 }
