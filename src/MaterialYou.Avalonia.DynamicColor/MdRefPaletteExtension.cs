@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Avalonia.Markup.Xaml;
+using Avalonia.Metadata;
+using Avalonia.Styling;
 using MaterialColorUtilities.Palettes;
 using MaterialColorUtilities.Schemes;
 
@@ -7,7 +9,10 @@ namespace MaterialYou.Avalonia.DynamicColor;
 
 public class MdRefPaletteExtension : MarkupExtension
 {
+    [ConstructorArgument("palette")]
     public string? Palette { get; set; }
+    
+    [ConstructorArgument("tone")]
     public int Tone { get; set; } = 50;
 
     public MdRefPaletteExtension() { }
@@ -16,24 +21,72 @@ public class MdRefPaletteExtension : MarkupExtension
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-        var targetObj = target?.TargetObject as AvaloniaObject;
-        var targetProp = target?.TargetProperty as AvaloniaProperty;
+        var targetInfo = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+        var targetObj = targetInfo?.TargetObject as AvaloniaObject;
+        var targetProp = targetInfo?.TargetProperty as AvaloniaProperty;
 
         var paletteName = Palette ?? "Primary";
         var tone = Tone;
 
-        // For Setter.Value (object type), return observable
+        // Setter context -> return mutable brush registered for in-place updates.
+        // Register even when CorePalette is null — the brush updates on first SetScheme().
+        if (targetInfo?.TargetObject is Setter)
+        {
+            var app = Application.Current;
+            var corePalette = app != null ? MaterialColor.GetCorePalette(app) : null;
+            s_paletteAccessors.TryGetValue(paletteName, out var accessor);
+            var initialColor = corePalette != null && accessor != null
+                ? ColorUtilities.UIntToColor(accessor(corePalette).Tone((uint)Math.Clamp(tone, 0, 100)))
+                : Colors.Transparent;
+            var brush = new SolidColorBrush(initialColor);
+            if (accessor != null)
+            {
+                var capturedAccessor = accessor;
+                var capturedTone = tone;
+                SchemeBrushRegistry.Register(brush, _ =>
+                {
+                    var cp = MaterialColor.GetCorePalette(Application.Current!);
+                    return cp != null ? capturedAccessor(cp).Tone((uint)Math.Clamp(capturedTone, 0, 100)) : 0;
+                });
+            }
+            return brush;
+        }
+
+        // For object-typed properties (non-Setter), return observable
         if (targetProp?.PropertyType == typeof(object))
             return new RefPaletteObservable(paletteName, tone);
 
+        // For non-Avalonia targets (other non-visual-tree contexts), return registered brush.
+        // Register even when CorePalette is null — the brush updates on first SetScheme().
+        if (targetObj is not AvaloniaObject || targetProp is not AvaloniaProperty)
+        {
+            var app = Application.Current;
+            var corePalette = app != null ? MaterialColor.GetCorePalette(app) : null;
+            s_paletteAccessors.TryGetValue(paletteName, out var accessor);
+            var initialColor = corePalette != null && accessor != null
+                ? ColorUtilities.UIntToColor(accessor(corePalette).Tone((uint)Math.Clamp(tone, 0, 100)))
+                : Colors.Transparent;
+            var brush = new SolidColorBrush(initialColor);
+            if (accessor != null)
+            {
+                var capturedAccessor = accessor;
+                var capturedTone = tone;
+                SchemeBrushRegistry.Register(brush, _ =>
+                {
+                    var cp = MaterialColor.GetCorePalette(Application.Current!);
+                    return cp != null ? capturedAccessor(cp).Tone((uint)Math.Clamp(capturedTone, 0, 100)) : 0;
+                });
+            }
+            return brush;
+        }
+
         // For typed properties (IBrush), return SolidColorBrush
-        var color = GetPaletteColor(paletteName, tone);
-        var brush = new SolidColorBrush(color);
+        var currentColor = GetPaletteColor(paletteName, tone);
+        var resultBrush = new SolidColorBrush(currentColor);
 
         TrackProperty(targetObj, targetProp, paletteName, tone);
 
-        return brush;
+        return resultBrush;
     }
 
     private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, string paletteName, int tone)
@@ -49,7 +102,14 @@ public class MdRefPaletteExtension : MarkupExtension
         {
             if (weakTarget.TryGetTarget(out var t))
             {
-                t.SetValue(prop, new SolidColorBrush(GetPaletteColor(paletteName, tone)));
+                var newColor = GetPaletteColor(paletteName, tone);
+                if (t.GetValue(prop) is SolidColorBrush existing)
+                {
+                    existing.Color = newColor;
+                    if (t is Visual v) v.InvalidateVisual();
+                }
+                else
+                    t.SetCurrentValue(prop, new SolidColorBrush(newColor));
             }
             else
             {

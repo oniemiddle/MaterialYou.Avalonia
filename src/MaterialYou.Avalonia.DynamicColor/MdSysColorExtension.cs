@@ -1,37 +1,67 @@
 using System.Collections.Generic;
+using Avalonia.Data;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.Metadata;
+using Avalonia.Styling;
 using MaterialColorUtilities.Schemes;
 
 namespace MaterialYou.Avalonia.DynamicColor;
 
 public class MdSysColorExtension(string name) : MarkupExtension
 {
+    [ConstructorArgument(nameof(name))]
     public string? Name { get; set; } = name;
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-        var targetObj = target?.TargetObject as AvaloniaObject;
-        var targetProp = target?.TargetProperty as AvaloniaProperty;
+        var targetInfo = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+        var targetObj = targetInfo?.TargetObject as AvaloniaObject;
+        var targetProp = targetInfo?.TargetProperty as AvaloniaProperty;
 
         var colorName = Name ?? "Primary";
 
-        // If target is Setter.Value (object type), return observable for styling system
+        // Setter context (Style/ControlTheme) -> return BindingBase so Setter augments
+        // via Bind(), which subscribes to the observable and handles dynamic updates with
+        // correct binding priority and automatic repaint triggers.
+        if (targetInfo?.TargetObject is Setter)
+        {
+            if (_getters.ContainsKey(colorName))
+                return new SchemeColorBindingObservable(colorName).ToBinding();
+            return new SolidColorBrush(Colors.Black);
+        }
+
+        // For object-typed properties (non-Setter), return observable
         if (targetProp?.PropertyType == typeof(object))
             return new SchemeColorObservable(colorName);
 
+        // For non-Avalonia targets (other non-visual-tree contexts), return registered brush
+        if (targetObj is not AvaloniaObject || targetProp is not AvaloniaProperty)
+        {
+            if (_getters.TryGetValue(colorName, out var getter))
+            {
+                var scheme = GetCurrentScheme();
+                var initialColor = scheme != null
+                    ? ColorUtilities.UIntToColor(getter(scheme))
+                    : Colors.Black;
+                var brush = new SolidColorBrush(initialColor);
+                SchemeBrushRegistry.Register(brush, s => getter(s));
+                return brush;
+            }
+            return new SolidColorBrush(Colors.Black);
+        }
+
         // For typed properties (IBrush), return a SolidColorBrush and subscribe to updates
-        var scheme = GetCurrentScheme();
-        var color = scheme != null && _getters.TryGetValue(colorName, out var getter)
-            ? ColorUtilities.UIntToColor(getter(scheme))
+        var currentScheme = GetCurrentScheme();
+        var currentColor = currentScheme != null && _getters.TryGetValue(colorName, out var currentGetter)
+            ? ColorUtilities.UIntToColor(currentGetter(currentScheme))
             : Colors.Black;
 
-        var brush = new SolidColorBrush(color);
+        var resultBrush = new SolidColorBrush(currentColor);
 
-        // Set up dynamic updates on the target property
         TrackProperty(targetObj, targetProp, colorName);
 
-        return brush;
+        return resultBrush;
     }
 
     private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, string colorName)
@@ -51,7 +81,13 @@ public class MdSysColorExtension(string name) : MarkupExtension
                 if (scheme != null && _getters.TryGetValue(colorName, out var getter))
                 {
                     var newColor = ColorUtilities.UIntToColor(getter(scheme));
-                    t.SetValue(prop, new SolidColorBrush(newColor));
+                    if (t.GetValue(prop) is SolidColorBrush existing)
+                    {
+                        existing.Color = newColor;
+                        if (t is Visual v) v.InvalidateVisual();
+                    }
+                    else
+                        t.SetCurrentValue(prop, new SolidColorBrush(newColor));
                 }
             }
             else
@@ -110,6 +146,35 @@ public class MdSysColorExtension(string name) : MarkupExtension
         [nameof(Scheme<>.SurfaceContainerHigh)] = s => s.SurfaceContainerHigh,
         [nameof(Scheme<>.SurfaceContainerHighest)] = s => s.SurfaceContainerHighest,
     };
+}
+
+/// <summary>
+/// IObservable for Setter context. Emits SolidColorBrush when scheme changes.
+/// Used with ToBinding() to let Setter subscribe via the BindingBase infrastructure
+/// which triggers property change → automatic repaint.
+/// </summary>
+internal class SchemeColorBindingObservable(string colorName) : IObservable<IBrush?>
+{
+    public IDisposable Subscribe(IObserver<IBrush?> observer)
+    {
+        Push();
+
+        MaterialColor.SchemeChanged += Handler;
+
+        return new DisposableAction(() => MaterialColor.SchemeChanged -= Handler);
+
+        void Handler(object? o, Scheme<uint>? scheme) => Push();
+
+        void Push()
+        {
+            var scheme = MdSysColorExtension.GetCurrentScheme();
+            if (scheme != null && MdSysColorExtension._getters.TryGetValue(colorName, out var getter))
+            {
+                var color = ColorUtilities.UIntToColor(getter(scheme));
+                observer.OnNext(new SolidColorBrush(color));
+            }
+        }
+    }
 }
 
 internal class SchemeColorObservable(string colorName) : IObservable<object?>

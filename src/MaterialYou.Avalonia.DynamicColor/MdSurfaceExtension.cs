@@ -1,31 +1,52 @@
 using Avalonia.Markup.Xaml;
+using Avalonia.Metadata;
+using Avalonia.Styling;
 using MaterialColorUtilities.Schemes;
 
 namespace MaterialYou.Avalonia.DynamicColor;
 
 public class MdSurfaceExtension(int level) : MarkupExtension
 {
+    [ConstructorArgument(nameof(level))]
     public int Level { get; set; } = level;
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        var target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-        var targetObj = target?.TargetObject as AvaloniaObject;
-        var targetProp = target?.TargetProperty as AvaloniaProperty;
+        var targetInfo = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+        var targetObj = targetInfo?.TargetObject as AvaloniaObject;
+        var targetProp = targetInfo?.TargetProperty as AvaloniaProperty;
 
         var level = Math.Clamp(Level, 0, 5);
 
-        // For Setter.Value (object type), return observable
+        // Setter context -> return mutable brush registered for in-place updates
+        if (targetInfo?.TargetObject is Setter)
+        {
+            var color = GetSurfaceColor(level);
+            var brush = new SolidColorBrush(color);
+            SchemeBrushRegistry.Register(brush, s => SurfaceAccessor(level, s));
+            return brush;
+        }
+
+        // For object-typed properties (non-Setter), return observable
         if (targetProp?.PropertyType == typeof(object))
             return new SurfaceObservable(level);
 
+        // For non-Avalonia targets (other non-visual-tree contexts), return registered brush
+        if (targetObj is not AvaloniaObject || targetProp is not AvaloniaProperty)
+        {
+            var color = GetSurfaceColor(level);
+            var brush = new SolidColorBrush(color);
+            SchemeBrushRegistry.Register(brush, s => SurfaceAccessor(level, s));
+            return brush;
+        }
+
         // For typed properties (IBrush), return SolidColorBrush
-        var color = GetSurfaceColor(level);
-        var brush = new SolidColorBrush(color);
+        var currentColor = GetSurfaceColor(level);
+        var resultBrush = new SolidColorBrush(currentColor);
 
         TrackProperty(targetObj, targetProp, level);
 
-        return brush;
+        return resultBrush;
     }
 
     private static void TrackProperty(AvaloniaObject? target, AvaloniaProperty? prop, int level)
@@ -41,7 +62,14 @@ public class MdSurfaceExtension(int level) : MarkupExtension
         {
             if (weakTarget.TryGetTarget(out var t))
             {
-                t.SetValue(prop, new SolidColorBrush(GetSurfaceColor(level)));
+                var newColor = GetSurfaceColor(level);
+                if (t.GetValue(prop) is SolidColorBrush existing)
+                {
+                    existing.Color = newColor;
+                    if (t is Visual v) v.InvalidateVisual();
+                }
+                else
+                    t.SetCurrentValue(prop, new SolidColorBrush(newColor));
             }
             else
             {
@@ -49,6 +77,17 @@ public class MdSurfaceExtension(int level) : MarkupExtension
             }
         }
     }
+
+    private static uint SurfaceAccessor(int level, Scheme<uint> scheme) => level switch
+    {
+        0 => scheme.Surface,
+        1 => scheme.Surface1,
+        2 => scheme.Surface2,
+        3 => scheme.Surface3,
+        4 => scheme.Surface4,
+        5 => scheme.Surface5,
+        _ => scheme.Surface,
+    };
 
     private static Color GetSurfaceColor(int level)
     {
